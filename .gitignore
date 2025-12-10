@@ -1,0 +1,9 @@
+.env
+images/*
+FAISS/*
+Indexing/FAISS/*
+Indexing/__pycache__/*
+__pycache__
+VectorStore/*
+botenv/*
+pdfs/*
