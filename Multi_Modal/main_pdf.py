@@ -1,4 +1,4 @@
-from ans_generation import gen_final_ans
+from Multi_Modal.ans_generation import gen_final_ans
 from Multi_Modal.chunking import get_chunks
 from Multi_Modal.SeperationAndSummarization import summarize_chunks
 from Multi_Modal.vectorstore import create_vector_store
@@ -8,7 +8,7 @@ import time
 
 
 
-def get_ans(filepath, query:str):
+def get_ans(filepath, query:str,vector_dir="Vector Stores"):
 
 
     try:
@@ -21,7 +21,7 @@ def get_ans(filepath, query:str):
         print("Seperation and Summarization Process Completed")
 
         print("Creating Vector Store")
-        db= create_vector_store(processed_chunk)
+        db= create_vector_store(processed_chunk,persist_directory=vector_dir)
         print("Vector Store Completed")
 
         print("Retreving & Answer Generation")
@@ -40,13 +40,13 @@ def get_ans(filepath, query:str):
         print(f"Process Failed,Error-{e}")
 
     
-filepath= "D:/Cite-What-You-Type/pdfs/22-25 Clustering, K-means, DBSCAN.pdf"
-query="what are the steps for DBSCAN Clustering And When should we use DBSCAN over KMeans"
+# filepath= "D:/Cite-What-You-Type/pdfs/22-25 Clustering, K-means, DBSCAN.pdf"
+# query="what are the steps for DBSCAN Clustering And When should we use DBSCAN over KMeans"
 
-start=time.time()
-ans = get_ans(filepath,query)
-print("Ans:",ans)
-print("Completed Whole process in :",time.time()-start)
+# start=time.time()
+# ans = get_ans(filepath,query)
+# print("Ans:",ans)
+# print("Completed Whole process in :",time.time()-start)
 
 
 

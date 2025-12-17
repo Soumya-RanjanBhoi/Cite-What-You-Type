@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 from fastapi import FastAPI, File, UploadFile
 from conversion import convert_to_pdf 
+from Multi_Modal.main_pdf import get_ans
 
 app = FastAPI()
 
@@ -21,7 +22,7 @@ async def save_file(file: UploadFile):
         raise
 
 @app.post("/process")
-async def processing(file: UploadFile = File(...)):
+async def processing(query:str,file: UploadFile = File(...)):
     try:
         saved_path = await save_file(file)
         
@@ -30,10 +31,15 @@ async def processing(file: UploadFile = File(...)):
         else:
             final_path = await convert_to_pdf(str(saved_path), str(UPLOAD_DIR))
             saved_path.unlink()
+
+            ans = get_ans(final_path,query,vector_dir="Vector Stores")
+
+        
         
         return {
             "status": "success",
-            "pdf_path": str(final_path)
+            "pdf_path": str(final_path),
+            "ans":ans
         }
     except Exception as e:
         return {"error": str(e)}
