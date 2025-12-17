@@ -9,3 +9,4 @@ VectorStore/*
 botenv/*
 pdfs/*
 docx_images/*
+upload_files/*
