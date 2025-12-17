@@ -3,7 +3,9 @@ images/*
 FAISS/*
 Indexing/FAISS/*
 Indexing/__pycache__/*
+text_based/__pycache__/*
 __pycache__
 VectorStore/*
 botenv/*
 pdfs/*
+docx_images/*
