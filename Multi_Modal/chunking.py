@@ -17,8 +17,8 @@ def extract_pdf_elements(filepath: str) -> list:
 def create_chunks_by_title(elements):
     chunks = chunk_by_title(
         elements,
-        max_characters=500,
-        combine_text_under_n_chars=100
+        max_characters=2000,
+        combine_text_under_n_chars=500
     )
 
     print("Chunks created: ", len(chunks))

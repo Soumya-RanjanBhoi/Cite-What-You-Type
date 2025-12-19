@@ -8,7 +8,7 @@ import time
 
 
 
-def get_ans(filepath, query:str,vector_dir="Vector Stores"):
+async def get_ans(filepath, query:str,index_name):
 
 
     try:
@@ -21,7 +21,7 @@ def get_ans(filepath, query:str,vector_dir="Vector Stores"):
         print("Seperation and Summarization Process Completed")
 
         print("Creating Vector Store")
-        db= create_vector_store(processed_chunk,persist_directory=vector_dir)
+        db= create_vector_store(processed_chunk,index_name)
         print("Vector Store Completed")
 
         print("Retreving & Answer Generation")

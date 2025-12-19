@@ -2,7 +2,7 @@ import subprocess
 import os
 from pathlib import Path
 
-async def convert_to_pdf(file_path: str, output_dir: str) -> Path:
+def convert_to_pdf(file_path: str, output_dir: str) -> Path:
     try:
         SOFFICE_PATH = r"C:\Program Files\LibreOffice\program\soffice.exe"
         
