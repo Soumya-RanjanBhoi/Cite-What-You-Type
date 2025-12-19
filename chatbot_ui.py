@@ -7,9 +7,7 @@ from Multi_Modal.main_pdf import get_ans
 from conversion import convert_to_pdf
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
-# ==================================================
-# 1. SESSION STATE
-# ==================================================
+
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = [
         SystemMessage(content="You are a helpful AI assistant")
@@ -20,9 +18,7 @@ if "saved_path" not in st.session_state:
 
 st.session_state.index_name = "soumyavectorstore"
 
-# ==================================================
-# 2. FILE SAVE SETUP
-# ==================================================
+
 UPLOAD_DIR = Path("temp_uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
@@ -38,9 +34,7 @@ def save_uploaded_file(uploaded_file):
         return None
 
 
-# ==================================================
-# 3. UI
-# ==================================================
+
 st.title("📄 RAG Chatbot")
 
 uploaded_file = st.file_uploader(
@@ -48,9 +42,7 @@ uploaded_file = st.file_uploader(
     type=["pdf", "docx", "txt"]
 )
 
-# ==================================================
-# 4. FILE PROCESSING
-# ==================================================
+
 if uploaded_file:
     path = save_uploaded_file(uploaded_file)
 
@@ -72,7 +64,7 @@ if uploaded_file:
                     st.error(f"Conversion failed: {e}")
                     st.stop()
 
-        # Reset state for new document
+       
         st.session_state.saved_path = str(final_path)
         st.session_state.chat_history = [
             SystemMessage(content="You are a helpful AI assistant")
@@ -80,9 +72,6 @@ if uploaded_file:
 
         st.success("✅ File uploaded and indexed!")
 
-# ==================================================
-# 5. DISPLAY CHAT HISTORY
-# ==================================================
 for msg in st.session_state.chat_history:
     if isinstance(msg, HumanMessage):
         with st.chat_message("user"):
@@ -91,9 +80,7 @@ for msg in st.session_state.chat_history:
         with st.chat_message("assistant"):
             st.write(msg.content)
 
-# ==================================================
-# 6. CHAT LOGIC
-# ==================================================
+
 user_query = st.chat_input("Ask a question about your document...")
 
 if user_query:
@@ -101,12 +88,10 @@ if user_query:
         st.error("⚠️ Please upload a document first.")
         st.stop()
 
-    # User message
+    
     st.session_state.chat_history.append(HumanMessage(content=user_query))
     with st.chat_message("user"):
         st.write(user_query)
-
-    # Assistant response
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             try:
@@ -125,7 +110,7 @@ if user_query:
                         st.session_state.index_name
                     )
 
-                answer = str(answer)  # guarantee valid AIMessage content
+                answer = str(answer)  
                 st.write(answer)
                 st.session_state.chat_history.append(
                     AIMessage(content=answer)
