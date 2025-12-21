@@ -1,13 +1,18 @@
 import subprocess
 import os
 from pathlib import Path
+import shutil
 
 async def convert_to_pdf(file_path: str, output_dir: str) -> Path:
     try:
-        SOFFICE_PATH = r"C:\Program Files\LibreOffice\program\soffice.exe"
+
+        if shutil.which("soffice"):
+            command="soffice"  # docker deployement ka samay
+        else:
+            command = r"C:\Program Files\LibreOffice\program\soffice.exe" #abhi ka liya
         
         subprocess.run([
-            SOFFICE_PATH,
+            command,
             "--headless",
             "--convert-to", "pdf",
             "--outdir", output_dir,
