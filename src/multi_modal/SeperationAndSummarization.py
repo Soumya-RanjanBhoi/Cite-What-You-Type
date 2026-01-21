@@ -1,8 +1,6 @@
 import json
 from typing import List
 from langchain_google_genai import ChatGoogleGenerativeAI,GoogleGenerativeAIEmbeddings
-from langchain_groq import ChatGroq
-import boto3
 from langchain_core.messages import HumanMessage
 from langchain_core.documents import Document
 from dotenv import load_dotenv
@@ -39,7 +37,7 @@ def seperate_content_types(chunk):
 
 def create_ai_enhanced_summary(text: str, tables: List[str], images: List[str]) -> str:
     try:
-        model = ChatGoogleGenerativeAI(model="gemini-2.5-flash",temperature=0.4)
+        model = ChatGoogleGenerativeAI(model='gemini-2.5-pro', temperature=0.3)
 
         prompt_text = f"""
         You are an AI assistant creating a searchable description for document retrieval.
