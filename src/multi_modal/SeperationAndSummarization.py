@@ -1,9 +1,7 @@
 import json
-from typing import List
-from langchain_google_genai import ChatGoogleGenerativeAI,GoogleGenerativeAIEmbeddings
-from langchain_core.messages import HumanMessage
 from langchain_core.documents import Document
 from dotenv import load_dotenv
+from src.Models.model import ApnaChatModel
 
 load_dotenv()
 
@@ -33,105 +31,103 @@ def seperate_content_types(chunk):
     
     content_data['types'] = list(set(content_data['types']))
     return content_data
-                
 
-def create_ai_enhanced_summary(text: str, tables: List[str], images: List[str]) -> str:
-    try:
-        model = ChatGoogleGenerativeAI(model='gemini-2.5-pro', temperature=0.3)
+def create_ai_enhanced_summary(text: str,tables: list,images: list) -> str:
 
-        prompt_text = f"""
+    model=ApnaChatModel()
+
+    prompt = f"""
         You are an AI assistant creating a searchable description for document retrieval.
 
-        --- CONTENT TO ANALYZE ---
-        
-        TEXT CONTENT:
+        --- TEXT CONTENT ---
         {text}
         """
 
-        if tables:
-            prompt_text += "\nTABLES:\n"
-            for i, table_obj in enumerate(tables):
-                prompt_text += f"Table {i+1}:\n{table_obj}\n\n"
+    if tables:
+        prompt += "\n--- TABLES ---\n"
+        for i, table in enumerate(tables):
+            prompt += f"Table {i+1}:\n{table}\n\n"
 
-        prompt_text += """ 
-                --- YOUR TASK ---
-                Generate a comprehensive, searchable description of the content above. 
-                Focus on creating metadata that will help a search engine find this document.
-                
-                Cover these 5 points:
-                1. Key facts, exact numbers, and data points (from text and tables)
-                2. Main topics and concepts discussed
-                3. Questions this content could answer (e.g., "What is the revenue for Q3?")
-                4. Visual Content Analysis (describe charts, diagrams, and patterns in the attached images)
-                5. Alternative keywords or synonyms users might search for.
+    prompt += """
+        --- YOUR TASK ---
+        Generate a comprehensive, searchable description.
 
-                Prioritize findability over brevity.
-                
-                SEARCHABLE DESCRIPTION: 
-                """
+        Cover:
+        1. Key facts, exact numbers, and metrics
+        2. Main topics and concepts
+        3. Questions this content can answer
+        4. Visual insights from images (charts, diagrams, patterns)
+        5. Alternative keywords and synonyms
 
-        message_content = [{'type': 'text', 'text': prompt_text}]
+        Prioritize searchability over brevity.
+        """
 
-        for image_base64 in images:
-            clean_base64 = image_base64.strip()
-            
-            message_content.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{clean_base64}"}})
+    content_blocks = []
 
-        message = HumanMessage(content=message_content)
-        
-        response = model.invoke([message])
+    for img_b64 in images:
+        content_blocks.append({
+            "image": {
+                "format": "jpeg",
+                "source": {
+                    "bytes": img_b64.strip()
+                }
+            }
+        })
 
-        return response.content
+    content_blocks.append({
+        "text": prompt
+    })
 
-    except Exception as e:
-        print(f"AI Summarization Failed: {e}")
-        return text
-    
+    messages = [
+        {
+            "role": "user",
+            "content": content_blocks
+        }
+    ]
+
+    return model.invoke(messages)
 
 def summarize_chunks(chunks):
 
-    print("...Processing Chunk ...")
-
-    langchain_document=[]
+    print("...Processing Chunks...")
+    langchain_document = []
 
     total_chunk = len(chunks)
 
-    for i , chunk in enumerate(chunks):
+    for i, chunk in enumerate(chunks):
         current_chunk = i+1
         print(f"Processed Chunk {current_chunk}/{total_chunk}")
 
-        content_data =seperate_content_types(chunk)
+        content_data = seperate_content_types(chunk)
 
-        print(f'Types Found: ',content_data['types'])
-        print(f"Tables: {len(content_data['tables'])} , Image: {len(content_data['images'])}")
+        print(f"Types Found: {content_data['types']}")
+        print(f"Tables: {len(content_data['tables'])}, Images: {len(content_data['images'])}")
 
-        enhanced_cnt =""
+        enhanced_cnt = ""
 
         if content_data['tables'] or content_data['images']:
-            print("Creating Summary...")
+            print("Creating AI Summary...")
             try:
-                enhanced_cnt = create_ai_enhanced_summary(content_data['text'],content_data['tables'],content_data['images'])
-
-                if enhanced_cnt:
-                    print("Successfully Summarized")
-                    print(f"Preview:{enhanced_cnt[:100]}...")
-                else:
-                    enhanced_cnt = content_data['text']
+                enhanced_cnt = create_ai_enhanced_summary(
+                    text=content_data['text'],
+                    tables=content_data['tables'],
+                    images=content_data['images'],
+                )
+                print("Summary created")
             except Exception as e:
-                print(f"AI Summary Failed: {e}")
-                enhanced_cnt= content_data['text']
-
+                print(f"Summary failed: {e}")
+                enhanced_cnt = content_data['text']
         else:
             print("No tables or Image Found")
-            enhanced_cnt= content_data['text']
+            enhanced_cnt = content_data['text']
 
         doc = Document(
             page_content=enhanced_cnt,
             metadata={
-                "original_content":json.dumps({
-                    'raw_text':content_data['text'],
-                    "table_html":content_data['tables'],
-                    "image_base64":content_data['images']
+                "original_content": json.dumps({
+                    "raw_text": content_data['text'],
+                    "table_html": content_data['tables'],
+                    "image_base64": content_data['images']
                 })
             }
         )
@@ -140,5 +136,3 @@ def summarize_chunks(chunks):
 
     print(f"Processed {len(langchain_document)} chunks")
     return langchain_document
-
-
