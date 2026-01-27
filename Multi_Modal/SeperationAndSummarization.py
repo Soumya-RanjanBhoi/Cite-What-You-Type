@@ -143,4 +143,3 @@ def summarize_chunks(chunks):
     print(f"Processed {len(langchain_document)} chunks")
     return langchain_document
 
-
